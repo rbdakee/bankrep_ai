@@ -54,9 +54,9 @@ def add_expense(message):
         amount = result['expense_amount']
         date = result['expense_date']
 
-        if amount is None:
+        if amount[0] is None:
             msg = bot.reply_to(message, "❌ Could you enter the amount again?")
-            bot.register_next_step_handler(msg, process_amount, message, categories, date)
+            bot.register_next_step_handler(msg, process_amount, message, categories, amount, date)
         elif len(categories) > 1:
             ask_category(message, categories, amount, date)
         else:
@@ -65,9 +65,9 @@ def add_expense(message):
     except Exception as e:
         bot.reply_to(message, f"❌ Could you try again, some error came out!\n{e}")
 
-def process_amount(message, original_message, categories, date):
+def process_amount(message, original_message, categories, amount, date):
     try:
-        amount = float(message.text.strip()) 
+        amount[0] = float(message.text.strip()) 
         if len(categories) > 1:
             ask_category(original_message, categories, amount, date)
         else:
@@ -129,8 +129,8 @@ def finalize_expense(message, category, amount, date):
     """ Finalize the expense entry and save to Google Sheets """
     try:
         id = message.date+message.chat.id
-        spreadsheet.append_row([id, category, amount, date])
-        bot.reply_to(message, f"✅ Noted: {category} - {amount} KZT.\nDate: {date}")
+        spreadsheet.append_row([id, category, amount[0], amount[1], date])
+        bot.reply_to(message, f"✅ Noted: \n{category}: {amount[0]}{amount[1]}.\nDate: {date}")
     except Exception as e:
         bot.reply_to(message, f"❌ Error saving to Google Sheets!\n{e}")
 
